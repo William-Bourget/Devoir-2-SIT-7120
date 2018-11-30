@@ -7,22 +7,87 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+#Partie pratique
+```{r functions, echo=FALSE,include=FALSE}
+library(olsrr)
+library(ggplot2)
+library(car)
+library(MASS)
+library(stats)
+library(glmbb)
+library(glmnet)
+library(plotmo)  
+library(xts)
+library(sp)
+#library(CASdatasets)
+options(scipen = 5)
+options(digits=5)
+data_tp1=read.table("weisberg56.dat",header=TRUE)
 ```
 
-## Including Plots
+##P1
 
-You can also embed plots, for example:
+```{r model complet,echo=TRUE}
+#Modèle complet 
+modele_complet=lm(SOMA ~ WT2+HT2+WT9+HT9+LG9+ST9, data = data_tp1)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#Modèle final
+#model_final=lm(SOMA ~ WT2+WT9+HT9+ST9, data = data_tp1)
+
+Y<-data_tp1$SOMA
+si <- studres(modele_complet) # residus studentises
+hatYi <- modele_complet$fitted.values # valeurs ajustees
+i <- 1:length(Y)
+
+ols_plot_resid_fit(modele_complet)
+
+
+# Résidus pour chaque observation
+plot(i,si,xlab="i",ylab="si",main="Résidus de chaque observation")
+abline(h=0,lty=2)
+
+# QQ-plot 
+ols_plot_resid_qq(modele_complet)
+
+# Tests de normalité
+ols_test_normality(modele_complet)
+
+# Transformation de Box-Cox
+boxcox(modele_complet)
+
+##########################################################################
+#Influence
+##########################################################################
+# Valeurs des h_ii
+ols_leverage(modele_complet)
+
+
+# DFBETAS
+ols_plot_dfbetas(modele_complet)
+
+
+# DFFITS
+ols_plot_dffits(modele_complet)
+
+
+# Distances de Cook
+ols_plot_cooksd_chart(modele_complet)
+
+
+# Residus vs h_ii
+ols_plot_resid_lev(modele_complet)
+
+
+# covratios
+covratio(modele_complet)
+
+
+# tableau résumé
+influence.measures(modele_complet)
+
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
