@@ -6,6 +6,80 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+#Partie théorique
+##T-1
+### #1
+On veut montrer que $\bar{e}=\sum_{i=1}^{n}\frac{e_i}{n}=0$.  On peut donc développer la formule de $\bar{e}$:
+
+\begin{align*}
+\bar{e} &= \sum_{i=1}^{n}\frac{e_i}{n}=\sum_{i=1}^{n}\frac{Y_i-\hat{Y_i}}{n}\\
+&=\bar{Y} -\frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n}   \\
+\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}&=\hat{\beta}_0\sum_{i=1}^{n}1 + \hat{\beta}_1\sum_{i=1}^{n}x_{i,1}+...+\hat{\beta}_{p^{'}}\sum_{i=1}^{n}x_{i,p^{'}} \\
+\frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n} &= \hat{\beta}_0 +\hat{\beta}_1 \bar{x}_1 +...+\hat{\beta}_{p^{'}} \bar{x}_{p^{'}} 
+\end{align*}
+
+Tel que donné dans l'énoncé, on prend pour acquis que:  $$\hat{\beta_0}=\bar{Y}-\hat{\beta_1}\bar{x}_1-...-\hat{\beta_{p^{'}}}\bar{x}_{p^{'}}$$
+Ainsi, on obtient:
+
+\begin{align*}
+\bar{e}&=\bar{Y} -\frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n}   \\
+&=\bar{Y}-\left(\hat{\beta}_0 +\hat{\beta}_1 \bar{x}_1 +...\hat{\beta}_{p^{'}} \bar{x}_{p^{'}}\right)\\
+&=\bar{Y}-\left(\left[\bar{Y}-\hat{\beta_1}\bar{x}_1-...-\hat{\beta_{p^{'}}}\bar{x}_{p^{'}}\right] +\hat{\beta}_1 \bar{x}_1 +...+\hat{\beta}_{p^{'}} \bar{x}_{p^{'}}\right)\\
+&=\bar{Y}-\bar{Y}\\
+\bar{e}&=0
+\end{align*}
+
+
+### #4
+Pour faire la courbe ROC, il faut calculer la valeur de $p_i=P(Y_i=1,x_i)=\frac{1}{1+exp(-(-4.2+1.2x_i))}$. Par la suite on calcule une prédiction de $\hat{Y}_i$ selon un certain seuil $u_k$ : si $p_i>u_k$, alors $\hat{Y}_i=1$, sinon $\hat{Y}_i=0$. On calule alors la sensibilié et la spécificité pour différents seuils. Voici un tableau des résulats ($\hat{Y}_i$ est représenté comme étant $Y^{k}$ selon la valeur de $u_k$), ainsi que le graphique de la courbe ROC:
+
+```{r theorie1_4,echo=FALSE}
+library(knitr)
+
+f=function(x){
+  ni=-4.2+1.2*x
+  1/(1+exp(-ni))
+}
+
+
+mathy.df <- data.frame(
+  labels=c("$u_k$","obs 1","obs 2","obs 3","obs 4","obs 5","obs 6"),
+  xi = c("NA",1:6), 
+  prob_i=c("NA",f(1:6)),
+  Y=c("NA",0,0,1,0,1,1),
+  y1=c(0.1,0,1,1,1,1,1),
+  y2=c(0.2,0,0,1,1,1,1),
+  y3=c(0.5,0,0,0,1,1,1),
+  y4=c(0.8,0,0,0,0,1,1),
+  y5=c(0.9,0,0,0,0,0,1)
+
+                       )
+
+colnames(mathy.df) <- c("Observation","$x_i$", "$p_i$","$Y_i$","$Y^{1}$","$Y^{2}$","$Y^{3}$","$Y^{4}$","$Y^{5}$")
+
+df_vp=data.frame(
+  labels=c("VP","FN","VN","FP","Sensibilité","Spécificité"),
+  y1=c(3,0,1,2,1,1/3),
+  y2=c(3,0,2,1,1,2/3),
+  y3=c(2,1,2,1,2/3,2/3),
+  y4=c(2,1,3,0,2/3,1),
+  y5=c(1,2,3,0,1/3,1)
+                )
+
+colnames(df_vp) <- c("Métriques","$Y^{1}$","$Y^{2}$","$Y^{3}$","$Y^{4}$","$Y^{5}$")
+
+kable(mathy.df, escape=FALSE)
+
+kable(df_vp, escape=FALSE)
+
+
+#Graphique
+sens=c(1,1,2/3,2/3,1/3)
+spec=c(1/3,2/3,2/3,1,1)
+
+plot(1-spec,sens,type="b",main="Courbe ROC",xlab="1-Spécificité",ylab="Sensibilité", ylim=c(0,1),col="blue")
+
+```
 
 
 #Partie pratique
@@ -28,7 +102,7 @@ data_tp1=read.table("weisberg56.dat",header=TRUE)
 
 ##P1
 
-```{r model complet,echo=TRUE}
+```{r model complet,echo=TRUE,eval=FALSE}
 #Modèle complet 
 modele_complet=lm(SOMA ~ WT2+HT2+WT9+HT9+LG9+ST9, data = data_tp1)
 
