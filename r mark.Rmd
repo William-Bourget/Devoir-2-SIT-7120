@@ -82,6 +82,355 @@ plot(1-spec,sens,type="b",main="Courbe ROC",xlab="1-Spécificité",ylab="Sensibi
 ```
 
 
+
+
+\clearpage
+
+##T-2
+
+### #4
+
+Le modèle est défini de la façon suivante:
+$$Y_{ij}=\beta_0 +\gamma_{i0}+(\beta_1+\gamma_{i1})x_{ij}+\epsilon_{ij}$$
+On peut définir la matrice L pour nos tests d'hypothèse qui prendront tous la même forme:
+$$\boldsymbol{\beta} = \left[\begin{array}
+{r}
+\beta_0\\
+\beta_1
+\end{array}\right]
+$$
+$$\boldsymbol{\gamma} = \left[\begin{array}
+{r}
+\gamma_{10}\\
+\gamma_{20}\\
+\gamma_{11} \\
+\gamma_{21} \\
+\end{array}\right]
+$$
+$$H_0:\boldsymbol{L}  \left[\begin{array}
+{r}
+\boldsymbol{\beta} \\
+\boldsymbol{\gamma} 
+\end{array}\right]=\boldsymbol{d}
+$$
+$$H_1:\boldsymbol{L}  \left[\begin{array}
+{r}
+\boldsymbol{\beta} \\
+\boldsymbol{\gamma} 
+\end{array}\right]\ne \boldsymbol{d}
+$$
+
+####a)
+
+$$\beta_0 +\gamma_{10}=0 \text{ et } \beta_0 +\gamma_{20}=0$$
+$$\boldsymbol{L}=  \left[\begin{array}
+{rrrrrr}
+1&0&1&0&0&0\\
+1&0&0&1&0&0\\
+\end{array}\right]
+$$
+$$\boldsymbol{d}=  \left[\begin{array}
+{r}
+0\\
+0\\
+\end{array}\right]
+$$
+
+####b)
+
+$$\beta_1 +\gamma_{11}=0 $$
+$$\boldsymbol{L}=  \left[\begin{array}
+{rrrrrr}
+0&1&0&0&1&0\\
+\end{array}\right]
+$$
+$$\boldsymbol{d}=  \left[\begin{array}
+{r}
+0\\
+\end{array}\right]
+$$
+
+####c)
+
+$$\beta_1 +\gamma_{11}=0 \text{ et } \beta_1 +\gamma_{21}=0$$
+$$\boldsymbol{L}=  \left[\begin{array}
+{rrrrrr}
+0&1&0&0&1&0\\
+0&1&0&0&0&1\\
+\end{array}\right]
+$$
+$$\boldsymbol{d}=  \left[\begin{array}
+{r}
+0\\
+0\\
+\end{array}\right]
+$$
+
+####b)
+
+$$\beta_1 +\gamma_{11}=\beta_1 +\gamma_{21} \leftrightarrow  \gamma_{21}=\gamma_{11} \leftrightarrow \gamma_{11}-\gamma_{21}=0 $$
+$$\boldsymbol{L}=  \left[\begin{array}
+{rrrrrr}
+0&0&0&0&1&-1\\
+\end{array}\right]
+$$
+$$\boldsymbol{d}=  \left[\begin{array}
+{r}
+0\\
+\end{array}\right]
+$$
+
+
+
+### #5
+####a) 
+On peut définir le modèle de cette façon: $Y_{ij}=\beta_0+\gamma_{0i} +\beta_1x_{ij} +\epsilon_{ij}$. Voici la notation matricielle:
+
+$$\mathbf{Y'} = \left[\begin{array}
+{rrrrrr}
+Y_{11}&Y_{12}&Y_{21}&Y_{22}&Y_{31}&Y_{32}\\
+\end{array}\right]
+$$
+$$\mathbf{X} = \left[\begin{array}
+{rr}
+1 & x_{11}\\
+1 & x_{12}\\
+1 & x_{21}\\
+1 & x_{22}\\
+1 & x_{31}\\
+1 & x_{32}\\
+\end{array}\right]
+$$
+$$\boldsymbol{\beta} = \left[\begin{array}
+{r}
+\beta_0\\
+\beta_1
+\end{array}\right]
+$$
+$$\boldsymbol{\gamma} = \left[\begin{array}
+{r}
+\gamma_{01}\\
+\gamma_{02}\\
+\gamma_{03}
+\end{array}\right]
+$$
+$$\mathbf{Z} = \left[\begin{array}
+{rrr}
+1 &  0 & 0\\
+1 &  0 & 0\\
+0 &  1 & 0\\
+0 &  1 & 0\\
+0 &  0 & 1\\
+0 &  0 & 1\\
+\end{array}\right]
+$$
+$$\mathbf{\epsilon'} = \left[\begin{array}
+{rrrrrr}
+\epsilon_{11}&\epsilon_{12}&\epsilon_{21}&\epsilon_{22}&\epsilon_{31}&\epsilon_{32}
+\end{array}\right]
+$$
+On peut également remplacer les valeurs symboliques de \textbf{Y} et \textbf{X} par leurs valeurs numériques:
+
+$$\mathbf{Y'} = \left[\begin{array}
+{rrrrrr}
+70&80&50&60&100&70
+\end{array}\right]
+$$
+$$\mathbf{X} = \left[\begin{array}
+{rr}
+1 & 1\\
+1 & 0\\
+1 & 1\\
+1 & 0\\
+1 & 0\\
+1 & 1\\
+\end{array}\right]
+$$
+
+
+####b)
+
+On trouve les matrices de variance:
+
+
+$$\mathbf{D}=Var(\boldsymbol{\gamma}) = \left[\begin{array}
+{rrr}
+\sigma_0^{2} &  0 & 0\\
+0 &  \sigma_0^{2} & 0\\
+0 &  0 & \sigma_0^{2}\\
+\end{array}\right]
+$$
+$$\mathbf{V}=Var(\boldsymbol{\epsilon}) = \left[\begin{array}
+{rrrrrr}
+\sigma^{2}&0&0&0&0&0\\
+0&\sigma^{2}&0&0&0&0\\
+0&0&\sigma^{2}&0&0&0\\
+0&0&0&\sigma^{2}&0&0\\
+0&0&0&0&\sigma^{2}&0\\
+0&0&0&0&0&\sigma^{2}\\
+\end{array}\right]
+$$
+$$\mathbf{\Sigma}=Var(\mathbf{Y})=\mathbf{Z}\mathbf{D}\mathbf{Z}^{'}+\mathbf{V}$$
+
+$$\mathbf{\Sigma} = \left[\begin{array}
+{rrrrrr}
+\sigma^{2}+\sigma_0^{2}&\sigma_0^{2}&0&0&0&0\\
+\sigma_0^{2}&\sigma^{2}+\sigma_0^{2}&0&0&0&0\\
+0&0&\sigma^{2}+\sigma_0^{2}&\sigma_0^{2}&0&0\\
+0&0&\sigma_0^{2}&\sigma^{2}+\sigma_0^{2}&0&0\\
+0&0&0&0&\sigma^{2}+\sigma_0^{2}&\sigma_0^{2}\\
+0&0&0&0&\sigma_0^{2}&\sigma^{2}+\sigma_0^{2}\\
+\end{array}\right]
+$$
+
+
+
+
+####c)
+Ces deux valeurs peuvent s'estimer avec les formules suivantes:
+
+$$\boldsymbol{\hat{\beta}}=(\mathbf{X^{'}\Sigma^{-1}X})^{-1}\mathbf{X^{'}\Sigma}^{-1}\mathbf{Y} $$
+$$\boldsymbol{\hat{\gamma}}=\mathbf{DZ^{'}\Sigma}^{-1}(\mathbf{Y}-\boldsymbol{X\beta})   $$
+On peut utiliser R pour calculer les valeurs numériques de ces estimés:
+
+
+```{r theorie2_5,echo=FALSE,eval=FALSE}
+Z=matrix(c(1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1),ncol=3)
+
+sig0=2
+D=diag(x=sig0,ncol=3,nrow=3)
+
+sig=1
+V=diag(x=sig,ncol=6,nrow=6)
+
+Y=matrix(c(70,80,50,60,100,70),ncol=1)
+X=matrix(c(1,1,1,1,1,1,1,0,1,0,0,1),ncol=2)
+
+mat_Sig=Z%*%D%*%t(Z)+V
+
+
+p1_B=t(X)%*%solve(mat_Sig)%*%X
+p2_B=t(X)%*%solve(mat_Sig)
+B=solve(p1_B)%*%p2_B%*%Y
+
+Gam=D%*%t(Z)%*%solve(mat_Sig)%*%(Y-X%*%B)
+
+Z
+D
+V
+Y
+X
+mat_Sig
+B
+Gam
+
+```
+
+
+$$\boldsymbol{\hat{\beta}} = \left[\begin{array}
+{r}
+80\\
+-16.67
+\end{array}\right]
+$$
+$$\boldsymbol{\hat{\gamma}} = \left[\begin{array}
+{r}
+2.67\\
+-13.33\\
+10.67\\
+\end{array}\right]
+$$
+ 
+#### d)
+
+On peut calculer l'estimé à partir de cette équation:
+$$\boldsymbol{\hat{Y_i}} =\boldsymbol{V_i\Sigma_i}^{-1}\boldsymbol{X_i^{'}\hat{\beta}}+(\boldsymbol{I}_{n_i*n_i}-\boldsymbol{V_i\Sigma_i}^{-1})\boldsymbol{Y_i} $$
+```{r theorie2_5_d,echo=FALSE,eval=FALSE}
+Z=matrix(c(1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1),ncol=3)
+
+sig0=2
+D=diag(x=sig0,ncol=3,nrow=3)
+
+sig=1
+V=diag(x=sig,ncol=6,nrow=6)
+
+Y=matrix(c(70,80,50,60,100,70),ncol=1)
+X=matrix(c(1,1,1,1,1,1,1,0,1,0,0,1),ncol=2)
+
+mat_Sig=Z%*%D%*%t(Z)+V
+
+
+p1_B=t(X)%*%solve(mat_Sig)%*%X
+p2_B=t(X)%*%solve(mat_Sig)
+B=solve(p1_B)%*%p2_B%*%Y
+
+Gam=D%*%t(Z)%*%solve(mat_Sig)%*%(Y-X%*%B)
+
+Z
+D
+V
+Y
+X
+mat_Sig
+B
+Gam
+solve(mat_Sig)
+
+mat_Sig2_inv=matrix(c(0.6,-0.4,-0.4,0.6),ncol=2)
+V2=diag(x=sig,ncol=2,nrow=2)
+Y2=matrix(c(50,60),ncol=1)
+I2=diag(x=1,ncol=2,nrow=2)
+X2=matrix(c(1,1,1,1),ncol=2)
+
+pred=V2%*%mat_Sig2_inv%*%X2%*%B+(I2-V2%*%mat_Sig2_inv)%*%Y2
+V2%*%mat_Sig2_inv
+X2%*%B
+(I2-V2%*%mat_Sig2_inv)
+Y2
+pred
+
+```
+Où:
+
+$$\boldsymbol{V_i\Sigma_i}^{-1}= \left[\begin{array}
+{rr}
+0.6 &  -0.4 \\
+-0.4 &  0.6 \\
+\end{array}\right]
+$$
+
+
+De cette façon, on obtient la valeur moyenne de $\boldsymbol{\hat{Y_i}} =56.67$ pour notre estimé.
+
+
+### #6
+
+####a)
+
+Dans cette situation, le paramètre d'intérêt est $\beta_3$ puisque celui-ci affectera la valeur de $Y_{ij}$ au fil du temps lorsque $xi=1$
+
+####b)
+Il serait acceptable de choisir les struture AR(1) et UN(1) étant donné que cette paire a la plus petite valeur d'AIC peut importe la méthode utilisé (REML ou ML).
+
+####c)
+
+On procède à un test d'hypothèse formel en testant un modèle complet et un modèle réduit:
+
+$$H_0: Y_{ij}=\beta_0+\gamma_{0i}+\beta_1x_i +\beta_2t_j+\beta_3x_it_j+\epsilon_{ij} $$
+
+$$H_1: Y_{ij}=\beta_0+\gamma_{0i}+\beta_1x_i +(\beta_2+\gamma_{2i})t_j+\beta_3x_it_j+\epsilon_{ij} $$
+On pose : $\epsilon=2(\ell_1-\ell_0)=2(-88+89.5)=3$. (On pourrait également utiliser les mesures REML pour des résultats semblables)
+
+Nous rejeterons l'hypothèse si la p-value du test est trop élevée:
+
+$$p=0.5P[\chi^{2}_{m_1-m_0-1}>\epsilon]+0.5P[\chi^{2}_{m_1-m_0}>\epsilon]$$
+$m_0=2$(2 variances) et $m_1=3$(3 variances). Par conséquent:
+
+$$p=0.5P[\chi^{2}_{0}>\epsilon]+0.5P[\chi^{2}_{1}>\epsilon]=0+0.5*0.08326=0.04163226$$
+La p-value n'atteint pas un seuil significatif (inférieur à 0.05), par conséquent on rejète l'hypothèse du modèle réduit. Il est toutefois à noter que la p-value est assez proche de 0.05 avec une valeur de 0.0416
+
+
+
 #Partie pratique
 ```{r functions, echo=FALSE,include=FALSE}
 library(olsrr)
