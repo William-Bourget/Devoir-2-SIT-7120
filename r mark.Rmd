@@ -455,6 +455,159 @@ La p-value est inférieur à 0.05, par conséquent on rejète l'hypothèse du mo
 
 
 #Partie pratique
+##P-1
+On reprend le modèle complet du TP1, sans la variable *LG9*, car il y avait de la multicolinéarité en sa présence.
+```{r import,echo=FALSE, include=FALSE}
+library(olsrr)
+library(ggplot2)
+library(car)
+library(MASS)
+library(stats)
+library(glmbb)
+library(glmnet)
+library(plotmo)  
+library(xts)
+library(sp)
+library(CASdatasets)
+data_tp1=read.table("weisberg56.dat",header=TRUE)
+modele_complet=lm(SOMA ~ WT2+HT2+WT9+HT9+ST9, data = data_tp1)
+
+si <- studres(modele_complet) # residus studentises
+hatYi <- modele_complet$fitted.values # valeurs ajustees
+i <- 1:length(data_tp1$SOMA)
+
+```
+
+Commençons par regarder les graphiques de résidus du modèle complet. 
+```{r fig1,echo=FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+# Graphique des paires (hatYi,ei)
+ols_plot_resid_fit(modele_complet)
+```
+```{r fig1.1,echo=FALSE, fig.height = 3, fig.width = 3}
+plot(hatYi,si,xlab="valeurs ajustées",ylab="résidus studentisés")
+abline(h=0,lty=2)
+# Graphique des paires (i,si)
+plot(i,si,xlab="i",ylab="si")
+abline(h=0,lty=2)
+
+```
+$\\ \\$
+L'allure des résidus semble correct. Il y a peut-être un petit manque de linéarité. Le test de *Box-cox* va être un bon indicateur si on doit faire une transformation sur la variable endogène. De plus on pourrait tester quelques intéractions. Comme on l'indiquait lors de TP1, plus un enfant de 2ans est pesant, mois son indice d'obésité à 18ans sera élevé. Cela peut sembler contre intuitif. Peut-être que la grandeur de l'enfant est vraiment importante à 2ans pour avoir une bonne mesure du poids. On va donc tester d'ajouter un intéraction entre le poids et la grandeur de l'enfant à 2ans. 
+
+```{r fig2,echo=FALSE, fig.height = 3, fig.width = 3}
+# QQ-plot normal
+ols_plot_resid_qq(modele_complet)
+# Tests de normalite, incluant Shapiro-Wilk
+ols_test_normality(modele_complet)
+```
+Le graphique de *QQ-plot* montre que les résidus semblent être distribué de façon normal. De plus le test de *Shapiro-Wilk* fait en sorte qu'on ne rejette pas l'hypothèse de normalité des résidus.
+
+Regardons le graphique des valeurs de lambda avec la transformation de *Box-Cox*
+$\\ \\$
+```{r fig3,echo=FALSE, fig.height = 3, fig.width = 3}
+# Transformation de Box-Cox
+boxcox(modele_complet)
+```
+$\\ \\$
+Il serait approprié de faire notre modèle de régression linéaire sur $\sqrt{Y}$. 
+$\\ \\$
+Regardons maintenant certaines statistiques sur l'influence des données.
+$\\ \\$
+```{r influence1,echo=FALSE}
+# DFFITS
+ols_plot_dffits(modele_complet)
+```
+
+```{r influence1.1,echo=FALSE}
+# Residus vs h_ii
+ols_plot_resid_lev(modele_complet)
+```
+$\\ \\$
+Les données 18 et 20 peuvent potentiellement causer des problèmes. Ils ont une certaines influences sur les valeurs prédites. Cependant, avec le graphique des résidus en fonction des $h_{ii}$ on remarque que ces données sont des outliers, mais cependant il n'ont pas un grand effet de levier. Donc il est correct de les conserver pour faire le modèle.
+$\\ \\$
+```{r influence1.3,echo=FALSE}
+# tableau résumé
+influence.measures(modele_complet)
+```
+En regardant la distance de cook ainsi que le  *covratio*, on remarque que certaine données influence la valeur des *beta* et la variance des estimateurs. Comme nous avons que 26 données, nous allons tout de même les conserver dans le modèle.
+
+On reprend maintenant le modèle final du TP1 avec les variables  *WT2, WT9, HT9 & ST9*
+Commençons par regarder les graphiques de résidus du modèle choisi. 
+```{r fig4,echo=FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+modele_choisi=lm(SOMA ~ WT2+WT9+HT9+ST9, data = data_tp1)
+
+si <- studres(modele_choisi) # residus studentises
+hatYi <- modele_choisi$fitted.values # valeurs ajustees
+i <- 1:length(data_tp1$SOMA)
+# Graphique des paires (hatYi,ei)
+ols_plot_resid_fit(modele_choisi)
+```
+
+```{r fig4.1,echo=FALSE, fig.height = 3, fig.width = 3}
+plot(hatYi,si,xlab="valeurs ajustées",ylab="résidus studentisés")
+abline(h=0,lty=2)
+# Graphique des paires (i,si)
+plot(i,si,xlab="i",ylab="si")
+abline(h=0,lty=2)
+
+```
+$\\ \\$
+L'allure des résidus semble correct. Les graphiques ont pratiquement la même allure que pour le modèle complet. Les mêmes conclusions sont tirées.
+
+```{r fig5,echo=FALSE, fig.height = 3, fig.width = 3}
+# QQ-plot normal
+ols_plot_resid_qq(modele_choisi)
+# Tests de normalite, incluant Shapiro-Wilk
+ols_test_normality(modele_choisi)
+```
+Le graphique de *QQ-plot* montre que les résidus semblent être distribué de façon normal. De plus le test de *Shapiro-Wilk* fait en sorte qu'on ne rejette pas l'hypothèse de normalité des résidus.
+
+Regardons le graphique des valeurs de lambda avec la transformation de *Box-Cox*
+$\\ \\$
+```{r fig6,echo=FALSE, fig.height = 3, fig.width = 3}
+# Transformation de Box-Cox
+boxcox(modele_choisi)
+```
+$\\ \\$
+Il serait aussi approprié de faire notre modèle de régression linéaire sur $\sqrt{Y}$. 
+
+$\\ \\$
+Regardons maintenant certaines statistiques sur l'influence des données pour le modèle final.
+$\\ \\$
+```{r influence2,echo=FALSE}
+# DFFITS
+ols_plot_dffits(modele_choisi)
+```
+
+```{r influence2.1,echo=FALSE}
+# Residus vs h_ii
+ols_plot_resid_lev(modele_choisi)
+```
+$\\ \\$
+Les données 18 et 20 peuvent potentiellement causer des problèmes. Ils ont une certaines influences sur les valeurs prédites. Cependant, avec le graphique des résidus en fonction des $h_{ii}$ on remarque que ces données sont des outliers, mais cependant il n'ont pas un grand effet de levier. Donc il est correct de les conserver pour faire le modèle.
+$\\ \\$
+```{r influence2.3,echo=FALSE}
+# tableau résumé
+influence.measures(modele_choisi)
+```
+En regardant la distance de cook ainsi que le  *covratio*, on remarque que certaines données influencent la valeur des *beta* et la variance des estimateurs. Comme nous avons que 26 données, nous allons tout de même les conserver dans le modèle.
+
+
+
+Le modèle final est celui où l'on effectue la régression sur $\sqrt{Y}$. De plus on ajoute la variable *HT2* ainsi que l'intéraction entre *WT2 et HT2* dans le modèle. Nous avons maintenant une relation positive entre le poids à 2ans et l'indice d'obésité. Voici maintenant la prédiction du modèle.
+$\\ \\$
+```{r final,echo=FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+modele_final=lm(sqrt(SOMA) ~ WT2+HT2+WT9+HT9+ST9+WT2*HT2, data = data_tp1)
+vecteur_data=data.frame(WT2=13,HT2=90,WT9=41,HT9=141,ST9=73)
+print("Prédiction pour Y")
+predict(modele_final,newdata = vecteur_data,interval=c("prediction"),level=0.95)^2
+```
+Un graphique intéressant à regarder est les résidus en fonction de $h_{ii}$. Il n'y a maintenant plus d'observation qui sont vraiment outlier. 
+$\\ \\$
+```{r influence3.1,echo=FALSE}
+ols_plot_resid_lev(modele_final)
+```
+\newpage
 ##P-2
 
 Tout d'abord, il est important de commencer l'analyse en considérant les effets aléatoires possibles dans le modèle. Puisque les variables `ratio` ainsi que `meanses` ne varient pas en fonction de l'école, ces variables ne sont pas utilisable comme pente aléatoire dans le modèle. Par ailleurs, il serait probable que le nombre d'heures de travail de l'étudiant à la maison par semaine varient selon l'école. Afin de constaté ceci, il est possible de faire un modèle complet de régression standard et visualiser sur un graphique les résidus en fonction de la variable `homework` pour ces différentes écoles. Afin d'avoir une vue allégée du graphique, seulement les 5 premières écoles sont dans le graphique des résidus plus bas.
