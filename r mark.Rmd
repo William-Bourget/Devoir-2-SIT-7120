@@ -5,6 +5,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(lme4)
 ```
 #Partie théorique
 ##T-1
@@ -13,13 +14,19 @@ On veut montrer que $\bar{e}=\sum_{i=1}^{n}\frac{e_i}{n}=0$.  On peut donc déve
 
 \begin{align*}
 \bar{e} &= \sum_{i=1}^{n}\frac{e_i}{n}=\sum_{i=1}^{n}\frac{Y_i-\hat{Y_i}}{n}\\
-&=\bar{Y} -\frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n}   \\
+        &=\bar{Y} -\frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n}   \\
+\end{align*}
+
+Nous pouvons écrire la somme de droite de cette façon:
+
+\begin{align*}
 \sum_{i=1}^{n}x_{i}^{'}\hat{\beta}&=\hat{\beta}_0\sum_{i=1}^{n}1 + \hat{\beta}_1\sum_{i=1}^{n}x_{i,1}+...+\hat{\beta}_{p^{'}}\sum_{i=1}^{n}x_{i,p^{'}} \\
 \frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n} &= \hat{\beta}_0 +\hat{\beta}_1 \bar{x}_1 +...+\hat{\beta}_{p^{'}} \bar{x}_{p^{'}} 
 \end{align*}
 
-Tel que donné dans l'énoncé, on prend pour acquis que:  $$\hat{\beta_0}=\bar{Y}-\hat{\beta_1}\bar{x}_1-...-\hat{\beta_{p^{'}}}\bar{x}_{p^{'}}$$
-Ainsi, on obtient:
+Tel que donnée dans l'énoncé, on peut prendre pour acquis que:  $$\hat{\beta_0}=\bar{Y}-\hat{\beta_1}\bar{x}_1-...-\hat{\beta_{p^{'}}}\bar{x}_{p^{'}}$$
+
+Ainsi, en remplaçant les valeurs obtenues avec l'équation plus haut, on obtient:
 
 \begin{align*}
 \bar{e}&=\bar{Y} -\frac{\sum_{i=1}^{n}x_{i}^{'}\hat{\beta}}{n}   \\
@@ -31,7 +38,7 @@ Ainsi, on obtient:
 
 
 ### #4
-Pour faire la courbe ROC, il faut calculer la valeur de $p_i=P(Y_i=1,x_i)=\frac{1}{1+exp(-(-4.2+1.2x_i))}$. Par la suite on calcule une prédiction de $\hat{Y}_i$ selon un certain seuil $u_k$ : si $p_i>u_k$, alors $\hat{Y}_i=1$, sinon $\hat{Y}_i=0$. On calule alors la sensibilié et la spécificité pour différents seuils. Voici un tableau des résulats ($\hat{Y}_i$ est représenté comme étant $Y^{k}$ selon la valeur de $u_k$), ainsi que le graphique de la courbe ROC:
+Pour faire la courbe ROC, il faut calculer la valeur de $\hat{\pi}_i=P(Y_i=1,x_i)=\frac{exp(-4.2+1.2x_i)}{1+exp(-4.2+1.2x_i)}$. Par la suite on calcule une prédiction de $\hat{Y}_i$ selon un certain seuil $u_k$ : si $\hat{\pi}_i>u_k$, alors $\hat{Y}_i=1$, sinon $\hat{Y}_i=0$. On calule alors la sensibilié et la spécificité pour les différents seuils. Voici un tableau des résulats ($\hat{Y}_i$ est représenté comme étant $\hat{Y}_{u}$ selon la valeur de $u_k$) pour les valeurs de $u_k$ =0.1, 0.2, 0.5, 0.8 et 0.9 ainsi que le graphique de la courbe ROC:
 
 ```{r theorie1_4,echo=FALSE}
 library(knitr)
@@ -43,19 +50,22 @@ f=function(x){
 
 
 mathy.df <- data.frame(
-  labels=c("$u_k$","obs 1","obs 2","obs 3","obs 4","obs 5","obs 6"),
-  xi = c("NA",1:6), 
-  prob_i=c("NA",f(1:6)),
-  Y=c("NA",0,0,1,0,1,1),
-  y1=c(0.1,0,1,1,1,1,1),
-  y2=c(0.2,0,0,1,1,1,1),
-  y3=c(0.5,0,0,0,1,1,1),
-  y4=c(0.8,0,0,0,0,1,1),
-  y5=c(0.9,0,0,0,0,0,1)
+  labels=c("obs 1","obs 2","obs 3","obs 4","obs 5","obs 6"),
+  xi = c(1:6), 
+  prob_i=c(f(1:6)),
+  Y=c(0,0,1,0,1,1),
+  Y_u1=c(0,1,1,1,1,1),
+  Y_u2=c(0,0,1,1,1,1),
+  Y_u3=c(0,0,0,1,1,1),
+  Y_u4=c(0,0,0,0,1,1),
+  Y_u5=c(0,0,0,0,0,1)
 
                        )
 
-colnames(mathy.df) <- c("Observation","$x_i$", "$p_i$","$Y_i$","$Y^{1}$","$Y^{2}$","$Y^{3}$","$Y^{4}$","$Y^{5}$")
+colnames(mathy.df) <- c("Observation","$x_i$", "$\\hat{\\pi}_i$","$Y_i$",
+                        "$\\hat{Y}_{u=0.1}$",
+                        "$\\hat{Y}_{u=0.2}$","$\\hat{Y}_{u=0.5}$",
+                        "$\\hat{Y}_{u=0.8}$","$\\hat{Y}_{u=0.9}$")
 
 df_vp=data.frame(
   labels=c("VP","FN","VN","FP","Sensibilité","Spécificité"),
@@ -66,7 +76,9 @@ df_vp=data.frame(
   y5=c(1,2,3,0,1/3,1)
                 )
 
-colnames(df_vp) <- c("Métriques","$Y^{1}$","$Y^{2}$","$Y^{3}$","$Y^{4}$","$Y^{5}$")
+colnames(df_vp) <- c("Métriques","$\\hat{Y}_{u=0.1}$",
+                        "$\\hat{Y}_{u=0.2}$","$\\hat{Y}_{u=0.5}$",
+                        "$\\hat{Y}_{u=0.8}$","$\\hat{Y}_{u=0.9}$")
 
 kable(mathy.df, escape=FALSE)
 
@@ -92,21 +104,24 @@ plot(1-spec,sens,type="b",main="Courbe ROC",xlab="1-Spécificité",ylab="Sensibi
 
 Le modèle est défini de la façon suivante:
 $$Y_{ij}=\beta_0 +\gamma_{i0}+(\beta_1+\gamma_{i1})x_{ij}+\epsilon_{ij}$$
-On peut définir la matrice L pour nos tests d'hypothèse qui prendront tous la même forme:
-$$\boldsymbol{\beta} = \left[\begin{array}
+On peut définir la matrice de betas et de gammas pour nos tests d'hypothèse qui prendront tous la même forme:
+$$\left[\begin{array}
+{r}
+\boldsymbol{\beta}\\
+\boldsymbol{\gamma}
+\end{array}\right]
+ = \left[\begin{array}
 {r}
 \beta_0\\
-\beta_1
-\end{array}\right]
-$$
-$$\boldsymbol{\gamma} = \left[\begin{array}
-{r}
+\beta_1\\
 \gamma_{10}\\
-\gamma_{20}\\
-\gamma_{11} \\
+\gamma_{11}\\
+\gamma_{20} \\
 \gamma_{21} \\
 \end{array}\right]
 $$
+
+
 $$H_0:\boldsymbol{L}  \left[\begin{array}
 {r}
 \boldsymbol{\beta} \\
@@ -121,27 +136,29 @@ $$H_1:\boldsymbol{L}  \left[\begin{array}
 $$
 
 ####a)
+Pour tester si l’effet moyen du médicament sur la pression sanguine moyenne dans cette population de souris est nul, on doit regarder l'espérance de $Y$ lorsque les effets aléatoires sont nuls. Alors,
 
-$$\beta_0 +\gamma_{10}=0 \text{ et } \beta_0 +\gamma_{20}=0$$
+$$E[Y ; x_0 = x+1] - E[Y ; x_0 = x] = 0$$
+Ce qui revient à tester si $\beta_1 = 0$.
+
 $$\boldsymbol{L}=  \left[\begin{array}
 {rrrrrr}
-1&0&1&0&0&0\\
-1&0&0&1&0&0\\
+0&1&0&0&0&0\\
 \end{array}\right]
 $$
 $$\boldsymbol{d}=  \left[\begin{array}
 {r}
 0\\
-0\\
 \end{array}\right]
 $$
 
 ####b)
+Pour tester si l’effet du médicament sur la pression sanguine moyenne dans la famille 1 est nul, ceci revient à tester si la valeur devant $x_{1j}$ est nulle pour la famille 1. Ceci revient alors à tester si
 
 $$\beta_1 +\gamma_{11}=0 $$
 $$\boldsymbol{L}=  \left[\begin{array}
 {rrrrrr}
-0&1&0&0&1&0\\
+0&1&0&1&0&0\\
 \end{array}\right]
 $$
 $$\boldsymbol{d}=  \left[\begin{array}
@@ -151,11 +168,11 @@ $$\boldsymbol{d}=  \left[\begin{array}
 $$
 
 ####c)
-
+Afin de tester si l’effet du médicament sur la pression sanguine moyenne est nul chez chacune des deux familles de souris, alors on souhaite tester si les valeurs devant $x_{ij}$ pour les 2 familles sont nulles. Alors, on peut tester simulatément ceci:
 $$\beta_1 +\gamma_{11}=0 \text{ et } \beta_1 +\gamma_{21}=0$$
 $$\boldsymbol{L}=  \left[\begin{array}
 {rrrrrr}
-0&1&0&0&1&0\\
+0&1&0&1&0&0\\
 0&1&0&0&0&1\\
 \end{array}\right]
 $$
@@ -166,12 +183,17 @@ $$\boldsymbol{d}=  \left[\begin{array}
 \end{array}\right]
 $$
 
-####b)
+####d)
+Afin de tester si une hausse d’une unité de la dose de médicament dans la famille 1 est équivalente à une hausse d’une unité de la dose de médicament dans la famille 2 en termes d’effet sur la pression sanguine moyenne, on peut réécrire le tout de la manière suivante:
+$$E[Y_1;x^{*}_{10}=x_{10}+1]-E[Y_1;x^{*}_{10}=x_{10}]=E[Y_2;x^{*}_{20}=x_{20}+1]-E[Y_2;x^{*}_{20}=x_{20}]$$
 
-$$\beta_1 +\gamma_{11}=\beta_1 +\gamma_{21} \leftrightarrow  \gamma_{21}=\gamma_{11} \leftrightarrow \gamma_{11}-\gamma_{21}=0 $$
+Alors ceci revient à tester si 
+$$\beta_1 + \gamma_{11} = \beta_1 + \gamma_{21}$$
+$$\gamma_{11} - \gamma_{21} = 0$$
+
 $$\boldsymbol{L}=  \left[\begin{array}
 {rrrrrr}
-0&0&0&0&1&-1\\
+0&0&0&1&0&-1\\
 \end{array}\right]
 $$
 $$\boldsymbol{d}=  \left[\begin{array}
@@ -184,7 +206,7 @@ $$
 
 ### #5
 ####a) 
-On peut définir le modèle de cette façon: $Y_{ij}=\beta_0+\gamma_{0i} +\beta_1x_{ij} +\epsilon_{ij}$. Voici la notation matricielle:
+On peut définir le modèle de cette façon: $Y_{ij}=\beta_0+\gamma_{i0} +\beta_1x_{ij} +\epsilon_{ij}$. Voici la notation matricielle:
 
 $$\mathbf{Y'} = \left[\begin{array}
 {rrrrrr}
@@ -209,9 +231,9 @@ $$\boldsymbol{\beta} = \left[\begin{array}
 $$
 $$\boldsymbol{\gamma} = \left[\begin{array}
 {r}
-\gamma_{01}\\
-\gamma_{02}\\
-\gamma_{03}
+\gamma_{10}\\
+\gamma_{20}\\
+\gamma_{30}
 \end{array}\right]
 $$
 $$\mathbf{Z} = \left[\begin{array}
@@ -295,6 +317,7 @@ On peut utiliser R pour calculer les valeurs numériques de ces estimés:
 
 
 ```{r theorie2_5,echo=FALSE,eval=FALSE}
+library(lme4)
 Z=matrix(c(1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1),ncol=3)
 
 sig0=2
@@ -400,117 +423,242 @@ $$\boldsymbol{V_i\Sigma_i}^{-1}= \left[\begin{array}
 $$
 
 
-De cette façon, on obtient la valeur moyenne de $\boldsymbol{\hat{Y_i}} =56.67$ pour notre estimé.
+De cette façon, on obtient la valeur moyenne de $\boldsymbol{\hat{Y_i}} =56.67$ pour notre estimé de la note moyenne obtenue par l’individu 2 dans les cours où il utilise un manuel de langue anglaise.
 
 
 ### #6
 
 ####a)
-
-Dans cette situation, le paramètre d'intérêt est $\beta_3$ puisque celui-ci affectera la valeur de $Y_{ij}$ au fil du temps lorsque $xi=1$
+Dans cette situation, le paramètre d'intérêt est $\beta_3$ puisque celui-ci estimera l'effet sur la valeur de $Y_{ij}$ au fil du temps seulement lorsque $x_i=1$.
 
 ####b)
-Il serait acceptable de choisir les struture AR(1) et UN(1) étant donné que cette paire a la plus petite valeur d'AIC peut importe la méthode utilisé (REML ou ML).
+Il serait raisonnable de choisir les strutures AR(1) et UN(1) puisque cette paire a la plus petite valeur d'AIC pour la méthode ML.
 
 ####c)
+On procède à un test d'hypothèse formel en testant un modèle complet (ligne 1) et un modèle réduit sans la pente aléatoire (ligne 2):
 
-On procède à un test d'hypothèse formel en testant un modèle complet et un modèle réduit:
+$$H_0: Y_{ij}=\beta_0+\gamma_{i0}+\beta_1x_i +\beta_2t_j+\beta_3x_it_j+\epsilon_{ij} $$
+$$H_1: Y_{ij}=\beta_0+\gamma_{i0}+\beta_1x_i +(\beta_2+\gamma_{i2})t_j+\beta_3x_it_j+\epsilon_{ij} $$
 
-$$H_0: Y_{ij}=\beta_0+\gamma_{0i}+\beta_1x_i +\beta_2t_j+\beta_3x_it_j+\epsilon_{ij} $$
-
-$$H_1: Y_{ij}=\beta_0+\gamma_{0i}+\beta_1x_i +(\beta_2+\gamma_{2i})t_j+\beta_3x_it_j+\epsilon_{ij} $$
-On pose : $\epsilon=2(\ell_1-\ell_0)=2(-88+89.5)=3$. (On pourrait également utiliser les mesures REML pour des résultats semblables)
+On pose : $\epsilon=2(\ell_1-\ell_0)=2(-88+89.5)=3$. (On pourrait également utiliser les mesures REML pour des résultats semblables).
 
 Nous rejeterons l'hypothèse si la p-value du test est trop élevée:
 
-$$p=0.5P[\chi^{2}_{m_1-m_0-1}>\epsilon]+0.5P[\chi^{2}_{m_1-m_0}>\epsilon]$$
-$m_0=2$(2 variances) et $m_1=3$(3 variances). Par conséquent:
+$$p value=0.5P[\chi^{2}_{m_1-m_0-1}>\epsilon]+0.5P[\chi^{2}_{m_1-m_0}>\epsilon]$$
+$m_0=1$(1 variance) et $m_1=2$(2 variances). Par conséquent:
 
 $$p=0.5P[\chi^{2}_{0}>\epsilon]+0.5P[\chi^{2}_{1}>\epsilon]=0+0.5*0.08326=0.04163226$$
-La p-value n'atteint pas un seuil significatif (inférieur à 0.05), par conséquent on rejète l'hypothèse du modèle réduit. Il est toutefois à noter que la p-value est assez proche de 0.05 avec une valeur de 0.0416
+La p-value est inférieur à 0.05, par conséquent on rejète l'hypothèse du modèle réduit avec ce seuil de 5% et on conserve l'effet aléatoire $\gamma_{i2}$. Il est toutefois à noter que la p-value est assez proche de 0.05 avec une valeur de 0.0416.
 
+
+\clearpage
 
 
 #Partie pratique
-```{r functions, echo=FALSE,include=FALSE}
-library(olsrr)
-library(ggplot2)
+##P-2
+
+Tout d'abord, il est important de commencer l'analyse en considérant les effets aléatoires possibles dans le modèle. Puisque les variables `ratio` ainsi que `meanses` ne varient pas en fonction de l'école, ces variables ne sont pas utilisable comme pente aléatoire dans le modèle. Par ailleurs, il serait probable que le nombre d'heures de travail de l'étudiant à la maison par semaine varient selon l'école. Afin de constaté ceci, il est possible de faire un modèle complet de régression standard et visualiser sur un graphique les résidus en fonction de la variable `homework` pour ces différentes écoles. Afin d'avoir une vue allégée du graphique, seulement les 5 premières écoles sont dans le graphique des résidus plus bas.
+
+```{r graph_residus,echo=FALSE,eval=TRUE}
+
+data.tp2 = read.table("homework.txt",header=TRUE)
+
+
+data.clean=data.tp2[,c("schid","meanses","homework","white","ratio","math")]
+
+
+modele.simple = lm(math~meanses+homework+white+ratio+meanses*white,data=data.clean)
+resid.lm = residuals(modele.simple)
+
+#Logiquement, on peut se dire que la seule pente aléatoire pouvant être incluse
+#dans le modèle est celle devant le nombre d'heure. Allons voir ceci.
+some_obs=unique(data.clean$schid)[1:5]
+
+
+plot(data.clean$homework[data.clean$schid==some_obs[1]],resid.lm[data.clean$schid==some_obs[1]],col=some_obs[1],
+     type="p",pch=20,xlab="homework",ylab="Résidus",ylim=c(-7,7),
+     main="Résidus de la régression ordinaire")
+# Boucle pour tracer les segments pour les rats suivants
+for(i in 2:5){
+  points(data.clean$homework[data.clean$schid==some_obs[i]],resid.lm[data.clean$schid==some_obs[i]],col=some_obs[i],pch=20)
+}
+#juste avec cela, on remarque qu'on a fort probablement besoin d'un effet aléatoire devant homework
+
+
+```
+
+Bien qu'il soit difficile à analyser, on semble voir une certaine dépendance avec l'école.
+
+
+# (a)
+Commençons en créant un modèle linéaire mixte sans considérer la variable `meanses`.
+
+Alors, avec le modèle suivant:
+$$Y_{ij}=\beta_0+\gamma_{i0}+\beta_1x_{ij1}+\beta_2x_{i2} +(\beta_3+\gamma_{i3})x_{ij3}+\epsilon_{ij} $$
+où  
+$Y_{ij}$ = résultat de l'étudiant j dans l'école i en mathématique.  
+$x_{ij1}$ = l'indicateur de 1 pour blanc pour l'étudiant j dans l'école i.  
+$x_{i2}$ = est le ratio du nomde d'étudiants par enseignant dans les classes de l'école i.  
+$x_{ij3}$ = le nombre d'heures de travail à la maison de l'étudiant j dans l'école i.  
+ 
+on peut tester si on obtient un AIC minimal avec les blocs de la matrice D non-structuré (UN) ou diagonale principale (UN(1)). Par simplicité et limitation du package `lme4`, la matrice V sera de composante de variance (VC).
+
+
+```{r AIC_,echo=FALSE,eval=TRUE}
+## Allons voir avec le modèle mixte. ##
+# Option 1: VC pour V, UN pour D
+ML.VCUN = lmer(math~white+ratio+homework
+               +(homework|schid),
+               data=data.clean,REML = FALSE)
+ML.VCUN1 = lmer(math~ratio+white+homework
+                +(homework||schid),data=data.clean,REML=FALSE)
+
+xyz=matrix(c(extractAIC(ML.VCUN)[2],extractAIC(ML.VCUN1)[2]),nrow=1)
+colnames(xyz)=c("VC et UN","     VC et UN(1)")
+rownames(xyz)="AIC"
+xyz
+
+```
+
+
+Alors, on choisit le modèle avec les blocs de la matrice D non-structuré (UN).  
+
+On peut poursuivre en effectuant un test de la nécessité des effets aléatoires avec le test suivant:
+$$H_0: Y_{ij}=\beta_0+\gamma_{i0}+\beta_1x_{ij1}+\beta_2x_{i2} +\beta_3x_{ij3}+\epsilon_{ij}$$
+$$H_1: Y_{ij}=\beta_0+\gamma_{i0}+\beta_1x_{ij1}+\beta_2x_{i2} +(\beta_3+\gamma_{i3})x_{ij3}+\epsilon_{ij}$$
+
+Et nous pourrons obtenir la p-value avec cette équation:
+
+$$p=0.5P[\chi^{2}_{1}>\epsilon]+0.5P[\chi^{2}_{2}>\epsilon]$$
+puisque nous avons que $m_0=1$(1 variance) et $m_1=3$(2 variances et 1 covariance). On obtient une valeur de $\epsilon=2(\ell_1-\ell_0)=89.74556$ et on obtient une p-value très près de 0. Alors, on rejette le l'hypothèse nulle et nous ne pouvons pas simplifier le modèle.
+
+```{r Test_nec,echo=FALSE,eval=FALSE}
+
+#On poursuit avec le test de la nécessite des effets aléatoires.
+#Ho avec 1 effet aléatoire
+#H1 avec 2 effet2 aléatoires
+ML.VCUN_H0 = lmer(math~white+ratio+homework
+                  +(1|schid),
+                  data=data.clean,REML = FALSE)
+
+
+epsilon = 2*(logLik(ML.VCUN)-logLik(ML.VCUN_H0))
+
+#on obtient un epsilon de 89.74556
+#puisque nous avons la matrice UN pour D, alors, sous H0 on a une variance,
+#et sous H1 on a 3 paramètres (2 variances, une covariance).
+pval = 0.5*(1-pchisq(89.74556,2))+0.5*(1-pchisq(89.74556,1))
+names(pval) = "p-value"
+
+
+```
+
+Il est possible d'effectuer une sélection des effets fixes avec la méthodes backward, où nous rejetons la variable `ratio`.
+
+
+```{r effets_fixes,echo=FALSE,eval=TRUE}
+#passons maintenant aux effets fixes.
 library(car)
-library(MASS)
-library(stats)
-library(glmbb)
-library(glmnet)
-library(plotmo)  
-library(xts)
-library(sp)
-#library(CASdatasets)
-options(scipen = 5)
-options(digits=5)
-data_tp1=read.table("weisberg56.dat",header=TRUE)
-```
-
-##P1
-
-```{r model complet,echo=TRUE,eval=FALSE}
-#Modèle complet 
-modele_complet=lm(SOMA ~ WT2+HT2+WT9+HT9+LG9+ST9, data = data_tp1)
-
-#Modèle final
-#model_final=lm(SOMA ~ WT2+WT9+HT9+ST9, data = data_tp1)
-
-Y<-data_tp1$SOMA
-si <- studres(modele_complet) # residus studentises
-hatYi <- modele_complet$fitted.values # valeurs ajustees
-i <- 1:length(Y)
-
-ols_plot_resid_fit(modele_complet)
+#Avant tout, assurons-nous d'avoir la méthode REML
+ML.VCUN = lmer(math~white+ratio+homework
+               +(homework|schid),
+               data=data.clean,REML = TRUE)
+ann=Anova(ML.VCUN)
+# On rejette la variable ratio
+ML.VCUN_Iter2 = lmer(math~white+homework
+                     +(homework|schid),
+                     data=data.clean,REML = TRUE)
+ann=Anova(ML.VCUN_Iter2)
 
 
-# Résidus pour chaque observation
-plot(i,si,xlab="i",ylab="si",main="Résidus de chaque observation")
-abline(h=0,lty=2)
+#On obtient ensuite nos betas et gamma ainsi
+#coef(ML.VCUN_Iter2)
+print("Résumé des coefficients des effets fixes")
+coef(summary(ML.VCUN_Iter2))[ , "Estimate"]
 
-# QQ-plot 
-ols_plot_resid_qq(modele_complet)
-
-# Tests de normalité
-ols_test_normality(modele_complet)
-
-# Transformation de Box-Cox
-boxcox(modele_complet)
-
-##########################################################################
-#Influence
-##########################################################################
-# Valeurs des h_ii
-ols_leverage(modele_complet)
-
-
-# DFBETAS
-ols_plot_dfbetas(modele_complet)
-
-
-# DFFITS
-ols_plot_dffits(modele_complet)
-
-
-# Distances de Cook
-ols_plot_cooksd_chart(modele_complet)
-
-
-# Residus vs h_ii
-ols_plot_resid_lev(modele_complet)
-
-
-# covratios
-covratio(modele_complet)
-
-
-# tableau résumé
-influence.measures(modele_complet)
-
-
+print("Résumé des effets aléatoires")
+ranef(ML.VCUN_Iter2)
 
 ```
 
+Alors, pour répondre aux questions de l'énoncé (a), l'effet du nombre d'heure est positif, alors plus un étudiant passe d'heure d'étude par semaine, meilleur sont ses résultats en mathématiques. De plus, l'augmentation moyenne sur le résultat en mathématique d'une heure d'étude supplémentaire par semaine sur l'ensemble des étudiant est de $1.903103 (\hat{\beta_3})$. Par ailleurs, puisque nous avons rejeté le modèle sans la pente aléatoire devant la variable $x_{ij3}$, on peut conclure qu'il est raisonnable de croire que l'effet du nombre d'heures varient d'une école à une autre.
 
+
+
+# (b)
+En procédant de la même façon que les étapes en (a) et en y rajoutant la variable `meanses`, on conserve la structure des variances VC et UN puisqu'on obtient un AIC minimal. De plus, en effectuant le test de la nécessité des effets aléatoires, on obtient un résultat identique, c'est-à-dire qu'on conserve la pente aléatoire devant la variable $x_{ij3}$ (nombre d'heures de travail par semaine tel que défini plus haut).
+
+
+
+
+```{r num_b,echo=FALSE,eval=FALSE}
+
+
+#b) AVEC la variables meanses
+## Allons voir avec le modèle mixte. ##
+# Option 1: VC pour V, UN pour D
+ML.VCUN = lmer(math~white+ratio+meanses+homework+meanses*homework
+               +(homework|schid),
+               data=data.clean,REML = FALSE)
+extractAIC(ML.VCUN)
+ML.VCUN1 = lmer(math~ratio+white+meanses+homework+meanses*homework
+                +(homework||schid),data=data.clean,REML=FALSE)
+extractAIC(ML.VCUN1)
+# On choisit VC et UN puisqu'on a le plus petit AIC avec ces choix de structure
+
+
+#On poursuit avec le test de la nécessite des effets aléatoires.
+#Ho avec 1 effet aléatoire
+#H1 avec 2 effets aléatoires
+ML.VCUN_H0 = lmer(math~white+ratio+homework+meanses+meanses*homework
+                  +(1|schid),
+                  data=data.clean,REML = FALSE)
+
+
+epsilon = 2*(logLik(ML.VCUN)-logLik(ML.VCUN_H0))
+
+#on obtient un epsilon de 87.34016
+#puisque nous avons la matrice UN pour D, alors, sous H0 on a une variance,
+#et sous H1 on a 3 paramètres (2 variances, une covariance).
+pval = 0.5*(1-pchisq(87.34016,2))+0.5*(1-pchisq(87.34016,1))
+pval
+
+#On rejette alors fortement H0 et on conserve le modèle tel quel.
+
+#Alors, oui leffet semble toujours varier par école
+```
+
+En utilisant la méthode backward pour la sélection des effets fixes, on rejette, en 2 étapes, la variable `ratio` ainsi que l'interaction `meanses*homework`
+
+
+```{r num_b2,echo=FALSE,eval=TRUE}
+
+#passons maintenant aux effets fixes.
+library(car)
+#Avant tout, assurons-nous d'avoir la méthode REML
+ML.VCUN = lmer(math~white+ratio+homework+meanses+meanses*homework
+               +(homework|schid),
+               data=data.clean,REML = TRUE)
+ann=Anova(ML.VCUN)
+# On rejette la variable ratio
+ML.VCUN_Iter2 = lmer(math~white+homework+meanses+meanses*homework
+                     +(homework|schid),
+                     data=data.clean,REML = TRUE)
+ann=Anova(ML.VCUN_Iter2)
+#Et on rejette ensuite l'interaction
+ML.VCUN_Iter3 = lmer(math~white+homework+meanses
+                     +(homework|schid),
+                     data=data.clean,REML = TRUE)
+ann=Anova(ML.VCUN_Iter3)
+
+#On obtient ensuite nos betas et gamma ainsi
+#coef(ML.VCUN_Iter3)
+print("Résumé des coefficients des effets fixes")
+coef(summary(ML.VCUN_Iter3))[ , "Estimate"]
+print("Résumé des effets aléatoires")
+ranef(ML.VCUN_Iter3)
+
+```
+
+Alors, pour répondre aux questions du numéro, l'ajout de la variable `meanses` au modèle n'a pas diminué le besoin d'inclure des effets aléatoires. De plus, l'effet moyen sur le résultat en mathématique d'une heure d'étude supplémentaire par semaine sur l'ensemble des étudiants est environ le même qu'obtenu précédemment, soit $\hat{\beta_3} = 1.925085$. Par ailleurs, puisque nous avons rejeté le modèle sans la pente aléatoire devant la variable $x_{ij3}$, on peut conclure qu'il est raisonnable de croire que l'effet du nombre d'heures varient d'une école à une autre.  
+Alors, le fait d'inclure ou non une variable unique à chaque école dans le modèle n'a pas réduit l'importance d'avoir des effets aléatoires dans le modèle et n'a non plus pas changé les conclusions.
